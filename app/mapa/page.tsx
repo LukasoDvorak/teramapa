@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { ALL_THERAPY_TYPES, TherapyType, Therapist } from '../data/therapists'
 import { supabase } from '../lib/supabase'
 import TherapistPanel from '../components/TherapistPanel'
+import Navigation from '../components/Navigation'
 
 const MapComponent = dynamic(() => import('../components/MapComponent'), { ssr: false })
 
@@ -73,7 +74,9 @@ export default function MapPage() {
     })
 
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: 'linear-gradient(175deg, #1C3D34 0%, #264D42 50%, #2E5E52 100%)' }}>
+    <div style={{ background: 'linear-gradient(175deg, #1C3D34 0%, #264D42 50%, #2E5E52 100%)' }}>
+      <Navigation variant="dark" />
+    <div style={{ display: 'flex', height: 'calc(100vh - 64px)', marginTop: '64px', overflow: 'hidden' }}>
 
       {/* ── Sidebar ── */}
       <aside style={{
@@ -92,7 +95,7 @@ export default function MapPage() {
         </div>
 
         {/* Obsah — fixní šířka, clipne se při zavírání */}
-        <div style={{ width: '340px', flexShrink: 0, position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', height: '100%', padding: '40px 32px 32px' }}>
+        <div style={{ width: '340px', flexShrink: 0, position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', height: '100%', padding: '28px 32px 32px' }}>
 
           {/* Logo + zpět */}
           <Link href="/" style={{ textDecoration: 'none', display: 'block', marginBottom: '4px' }}>
@@ -268,6 +271,7 @@ export default function MapPage() {
         therapist={selectedTherapist}
         onClose={() => setSelectedTherapist(null)}
       />
+    </div>
     </div>
   )
 }
