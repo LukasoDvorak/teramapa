@@ -17,6 +17,7 @@ export interface Therapist {
   phone?: string | null
   website?: string | null
   description: string
+  profile_photo_url?: string | null
   approved?: boolean
   user_id?: string
   created_at?: string

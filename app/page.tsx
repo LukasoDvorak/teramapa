@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ALL_THERAPY_TYPES, TherapyType, Therapist } from './data/therapists'
 import { supabase } from './lib/supabase'
+import TherapistPanel from './components/TherapistPanel'
 
 const MapComponent = dynamic(() => import('./components/MapComponent'), { ssr: false })
 
@@ -21,10 +22,11 @@ export default function Home() {
   const [therapists, setTherapists] = useState<Therapist[]>([])
   const [loading, setLoading] = useState(true)
   const [activeFilters, setActiveFilters] = useState<TherapyType[]>([])
+  const [selectedTherapist, setSelectedTherapist] = useState<Therapist | null>(null)
 
   useEffect(() => {
     async function fetchTherapists() {
-      const { data, error } = await supabase.from('therapists').select('*')
+      const { data, error } = await supabase.from('therapists').select('*').eq('approved', true)
       if (!error && data) setTherapists(data as Therapist[])
       setLoading(false)
     }
@@ -89,15 +91,21 @@ export default function Home() {
       </div>
 
       {/* Mapa */}
-      <div className="flex-1">
+      <div className="flex-1 relative">
         {loading ? (
           <div className="flex items-center justify-center h-full text-gray-400">
             Načítám terapeuty...
           </div>
         ) : (
-          <MapComponent therapists={filtered} />
+          <MapComponent therapists={filtered} onSelect={setSelectedTherapist} />
         )}
       </div>
+
+      {/* Slide-out panel */}
+      <TherapistPanel
+        therapist={selectedTherapist}
+        onClose={() => setSelectedTherapist(null)}
+      />
     </div>
   )
 }

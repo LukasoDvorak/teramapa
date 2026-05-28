@@ -1,11 +1,10 @@
 'use client'
 
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker } from 'react-leaflet'
 import L from 'leaflet'
 import { Therapist, TherapyType } from '../data/therapists'
 import 'leaflet/dist/leaflet.css'
 
-// Fix pro výchozí ikony markerů v Next.js
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -32,18 +31,19 @@ function createColoredIcon(therapyType: TherapyType) {
       border: 3px solid white;
       border-radius: 50%;
       box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      cursor: pointer;
     "></div>`,
     iconSize: [28, 28],
     iconAnchor: [14, 14],
-    popupAnchor: [0, -16],
   })
 }
 
 interface Props {
   therapists: Therapist[]
+  onSelect: (therapist: Therapist) => void
 }
 
-export default function MapComponent({ therapists }: Props) {
+export default function MapComponent({ therapists, onSelect }: Props) {
   return (
     <MapContainer
       center={[49.8, 15.5]}
@@ -60,44 +60,8 @@ export default function MapComponent({ therapists }: Props) {
           key={t.id}
           position={[t.lat, t.lng]}
           icon={createColoredIcon(t.therapy_types[0])}
-        >
-          <Popup minWidth={220}>
-            <div style={{ fontFamily: 'system-ui, sans-serif' }}>
-              <p style={{ fontWeight: 700, fontSize: '15px', margin: '0 0 6px' }}>{t.name}</p>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '8px' }}>
-                {t.therapy_types.map((type) => (
-                  <span
-                    key={type}
-                    style={{
-                      background: THERAPY_COLORS[type],
-                      color: 'white',
-                      borderRadius: '12px',
-                      padding: '2px 8px',
-                      fontSize: '11px',
-                      fontWeight: 600,
-                    }}
-                  >
-                    {type}
-                  </span>
-                ))}
-              </div>
-              <p style={{ margin: '0 0 4px', fontSize: '12px', color: '#555' }}>{t.address}</p>
-              <p style={{ margin: '0 0 4px', fontSize: '12px', color: '#555' }}>{t.description}</p>
-              {t.phone && (
-                <p style={{ margin: '4px 0 0', fontSize: '12px' }}>
-                  <a href={`tel:${t.phone}`} style={{ color: '#6366f1' }}>{t.phone}</a>
-                </p>
-              )}
-              {t.website && (
-                <p style={{ margin: '4px 0 0', fontSize: '12px' }}>
-                  <a href={t.website} target="_blank" rel="noopener noreferrer" style={{ color: '#6366f1' }}>
-                    Navštívit web →
-                  </a>
-                </p>
-              )}
-            </div>
-          </Popup>
-        </Marker>
+          eventHandlers={{ click: () => onSelect(t) }}
+        />
       ))}
     </MapContainer>
   )
