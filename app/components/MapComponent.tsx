@@ -1,6 +1,7 @@
 'use client'
 
-import { MapContainer, TileLayer, Marker, Tooltip } from 'react-leaflet'
+import { useEffect } from 'react'
+import { MapContainer, TileLayer, Marker, Tooltip, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { Therapist, TherapyType } from '../data/therapists'
 import 'leaflet/dist/leaflet.css'
@@ -38,23 +39,70 @@ function createColoredIcon(therapyType: TherapyType) {
   })
 }
 
+const CZECH_BOUNDS: L.LatLngBoundsExpression = [
+  [48.5, 12.0],
+  [51.1, 18.9],
+]
+
+function MapController({ search }: { search: string }) {
+  const map = useMap()
+
+  useEffect(() => {
+    const trimmed = search.trim()
+    if (trimmed.length < 2) {
+      // Při smazání vyhledávání se vrátit na celou ČR
+      if (trimmed.length === 0) {
+        map.flyTo([49.8, 15.5], 8, { duration: 1 })
+      }
+      return
+    }
+
+    const timeout = setTimeout(() => {
+      fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(trimmed)}&format=json&limit=1&countrycodes=cz`
+      )
+        .then((r) => r.json())
+        .then((data) => {
+          if (data && data[0]) {
+            map.flyTo([parseFloat(data[0].lat), parseFloat(data[0].lon)], 12, { duration: 1 })
+          }
+        })
+        .catch(() => {})
+    }, 600)
+
+    return () => clearTimeout(timeout)
+  }, [search, map])
+
+  return null
+}
+
 interface Props {
   therapists: Therapist[]
   onSelect: (therapist: Therapist) => void
+  search: string
 }
 
-export default function MapComponent({ therapists, onSelect }: Props) {
+export default function MapComponent({ therapists, onSelect, search }: Props) {
+
   return (
     <MapContainer
       center={[49.8, 15.5]}
-      zoom={7}
+      zoom={8}
+      minZoom={8}
+      maxZoom={16}
+      zoomSnap={0.5}
+      maxBounds={CZECH_BOUNDS}
+      maxBoundsViscosity={1.0}
       style={{ height: '100%', width: '100%' }}
       scrollWheelZoom={true}
     >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
       />
+
+      <MapController search={search} />
+
       {therapists.map((t) => (
         <Marker
           key={t.id}

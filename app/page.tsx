@@ -23,6 +23,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const [activeFilters, setActiveFilters] = useState<TherapyType[]>([])
   const [selectedTherapist, setSelectedTherapist] = useState<Therapist | null>(null)
+  const [search, setSearch] = useState('')
 
   useEffect(() => {
     async function fetchTherapists() {
@@ -39,9 +40,13 @@ export default function Home() {
     )
   }
 
-  const filtered = activeFilters.length === 0
-    ? therapists
-    : therapists.filter((t) => t.therapy_types.some((type) => activeFilters.includes(type)))
+  const filtered = therapists
+    .filter((t) => activeFilters.length === 0 || t.therapy_types.some((type) => activeFilters.includes(type)))
+    .filter((t) => {
+      if (!search.trim()) return true
+      const q = search.toLowerCase()
+      return t.city.toLowerCase().includes(q) || t.name.toLowerCase().includes(q)
+    })
 
   return (
     <div className="flex flex-col h-screen bg-white">
@@ -64,7 +69,16 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Filtry */}
+      {/* Vyhledávání + Filtry */}
+      <div className="flex flex-wrap gap-2 px-6 py-3 border-b border-gray-100 bg-gray-50">
+        <input
+          type="text"
+          placeholder="Hledat město nebo jméno..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="border border-gray-200 rounded-full px-4 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white w-56"
+        />
+      </div>
       <div className="flex flex-wrap gap-2 px-6 py-3 border-b border-gray-100 bg-gray-50">
         {ALL_THERAPY_TYPES.map((type) => {
           const isActive = activeFilters.includes(type)
@@ -97,7 +111,7 @@ export default function Home() {
             Načítám terapeuty...
           </div>
         ) : (
-          <MapComponent therapists={filtered} onSelect={setSelectedTherapist} />
+          <MapComponent therapists={filtered} onSelect={setSelectedTherapist} search={search} />
         )}
       </div>
 
