@@ -54,10 +54,10 @@ export default function Home() {
             {loading ? 'Načítám...' : `${filtered.length} ${filtered.length === 1 ? 'terapeut' : filtered.length < 5 ? 'terapeuti' : 'terapeutů'}`}
           </span>
           <Link
-            href="/registrace"
+            href="/prihlaseni"
             className="bg-indigo-600 text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-indigo-700 transition-colors"
           >
-            + Přidat se
+            Přihlásit se
           </Link>
         </div>
       </header>

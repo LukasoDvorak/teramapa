@@ -7,6 +7,8 @@ import { ALL_THERAPY_TYPES, TherapyType } from '../data/therapists'
 
 export default function RegistracePage() {
   const [form, setForm] = useState({
+    email: '',
+    password: '',
     name: '',
     therapy_types: [] as TherapyType[],
     address: '',
@@ -34,7 +36,7 @@ export default function RegistracePage() {
     setError('')
 
     try {
-      // Geocoding adresy přes OpenStreetMap Nominatim (zdarma, bez API klíče)
+      // 1. Geocoding adresy
       const query = `${form.address}, ${form.city}, Česká republika`
       const geoRes = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`,
@@ -51,6 +53,25 @@ export default function RegistracePage() {
       const lat = parseFloat(geoData[0].lat)
       const lng = parseFloat(geoData[0].lon)
 
+      // 2. Vytvoření účtu
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: form.email,
+        password: form.password,
+      })
+
+      if (authError) {
+        if (authError.message.includes('already registered')) {
+          setError('Tento email je již registrován. Přihlas se místo toho.')
+        } else {
+          setError('Chyba při vytváření účtu: ' + authError.message)
+        }
+        setLoading(false)
+        return
+      }
+
+      const userId = authData.user?.id
+
+      // 3. Vytvoření profilu terapeuta
       const { error: dbError } = await supabase.from('therapists').insert({
         name: form.name,
         therapy_types: form.therapy_types,
@@ -61,6 +82,8 @@ export default function RegistracePage() {
         phone: form.phone || null,
         website: form.website || null,
         description: form.description,
+        user_id: userId,
+        approved: false,
       })
 
       if (dbError) throw dbError
@@ -83,12 +106,13 @@ export default function RegistracePage() {
             </svg>
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Registrace proběhla!</h2>
-          <p className="text-gray-500 mb-6">Tvůj profil je nyní viditelný na mapě.</p>
+          <p className="text-gray-500 mb-2">Tvůj profil byl odeslán ke schválení.</p>
+          <p className="text-gray-400 text-sm mb-6">Jakmile tě admin schválí, zobrazíš se na mapě. Přihlas se kdykoliv a zkontroluj stav.</p>
           <Link
-            href="/"
+            href="/prihlaseni"
             className="inline-block bg-indigo-600 text-white rounded-lg px-6 py-2.5 font-medium text-sm hover:bg-indigo-700 transition-colors"
           >
-            Zobrazit mapu
+            Přihlásit se
           </Link>
         </div>
       </div>
@@ -104,10 +128,47 @@ export default function RegistracePage() {
 
       <main className="max-w-xl mx-auto px-4 py-10">
         <h1 className="text-2xl font-bold text-gray-900 mb-1">Přidej se na mapu</h1>
-        <p className="text-gray-500 mb-8">Základní registrace je zdarma.</p>
+        <p className="text-gray-500 mb-8">Základní registrace je zdarma. Profil se zobrazí po schválení.</p>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-5">
-          {/* Jméno */}
+
+          {/* Přihlašovací údaje */}
+          <div className="pb-4 border-b border-gray-100">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">Přihlašovací údaje</p>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="email"
+                  required
+                  placeholder="jana@example.cz"
+                  value={form.email}
+                  onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Heslo <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="password"
+                  required
+                  minLength={6}
+                  placeholder="Alespoň 6 znaků"
+                  value={form.password}
+                  onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Profil */}
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Profil</p>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Jméno a titul <span className="text-red-400">*</span>
@@ -122,7 +183,6 @@ export default function RegistracePage() {
             />
           </div>
 
-          {/* Typy terapií */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Typy terapií <span className="text-red-400">*</span>
@@ -148,7 +208,6 @@ export default function RegistracePage() {
             </div>
           </div>
 
-          {/* Adresa */}
           <div className="grid grid-cols-2 gap-3">
             <div className="col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -178,7 +237,6 @@ export default function RegistracePage() {
             </div>
           </div>
 
-          {/* Kontakt */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Telefon</label>
             <input
@@ -201,7 +259,6 @@ export default function RegistracePage() {
             />
           </div>
 
-          {/* Popis */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Popis <span className="text-red-400">*</span>
@@ -223,8 +280,15 @@ export default function RegistracePage() {
             disabled={loading || form.therapy_types.length === 0}
             className="w-full bg-indigo-600 text-white rounded-lg py-2.5 font-medium text-sm hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {loading ? 'Ukládám a hledám adresu na mapě...' : 'Přidat se na mapu'}
+            {loading ? 'Ukládám...' : 'Vytvořit účet a odeslat ke schválení'}
           </button>
+
+          <p className="text-center text-sm text-gray-400">
+            Už máš účet?{' '}
+            <Link href="/prihlaseni" className="text-indigo-600 hover:underline">
+              Přihlas se
+            </Link>
+          </p>
         </form>
       </main>
     </div>
