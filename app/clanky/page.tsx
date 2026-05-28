@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import Navigation from '../components/Navigation'
 
 const CLANKY = [
@@ -14,6 +13,8 @@ const CLANKY = [
     datum: '12. května 2025',
     cteniMin: 5,
     emoji: '🧠',
+    bgFrom: '#3D2E6B',
+    bgTo: '#6B5AAD',
   },
   {
     id: 2,
@@ -25,6 +26,8 @@ const CLANKY = [
     datum: '3. května 2025',
     cteniMin: 7,
     emoji: '🌱',
+    bgFrom: '#1E4A30',
+    bgTo: '#3D7A55',
   },
   {
     id: 3,
@@ -36,6 +39,8 @@ const CLANKY = [
     datum: '24. dubna 2025',
     cteniMin: 6,
     emoji: '🌿',
+    bgFrom: '#1A4A48',
+    bgTo: '#2E7A74',
   },
   {
     id: 4,
@@ -47,6 +52,8 @@ const CLANKY = [
     datum: '15. dubna 2025',
     cteniMin: 8,
     emoji: '💬',
+    bgFrom: '#5A3018',
+    bgTo: '#A06030',
   },
   {
     id: 5,
@@ -58,24 +65,94 @@ const CLANKY = [
     datum: '7. dubna 2025',
     cteniMin: 5,
     emoji: '🎨',
+    bgFrom: '#5A1E3A',
+    bgTo: '#A04070',
   },
   {
     id: 6,
     kategorie: 'Výživa',
     kategorieColor: '#B8A050',
-    titulek: 'Střevo jako druhý mozek — co to znamená v praxi',
+    titulek: 'Střevo jako druhý mozek',
     perex: 'Výzkumy posledních let ukazují propojení střevního mikrobiomu s náladou, úzkostí i kvalitou spánku. Jak toto poznání mění přístup výživových poradců?',
     autor: 'Redakce Teramapa',
     datum: '29. března 2025',
     cteniMin: 6,
     emoji: '🥗',
+    bgFrom: '#3A3010',
+    bgTo: '#706020',
   },
 ]
 
-const FEATURED = CLANKY[0]
-const REST = CLANKY.slice(1)
+function KategoriePill({ label, color }: { label: string; color: string }) {
+  return (
+    <span style={{
+      background: color + '18',
+      color: color,
+      border: `1px solid ${color}44`,
+      borderRadius: '20px',
+      padding: '4px 12px',
+      fontSize: '11px',
+      fontWeight: 600,
+      letterSpacing: '0.3px',
+      textTransform: 'uppercase',
+    }}>
+      {label}
+    </span>
+  )
+}
+
+function MetaLine({ autor, datum, min }: { autor: string; datum: string; min: number }) {
+  return (
+    <p style={{ fontSize: '12px', color: '#9A9088', margin: 0 }}>
+      {autor} · {datum} · {min} min čtení
+    </p>
+  )
+}
+
+function BrzyBadge() {
+  return (
+    <span style={{
+      fontSize: '11px',
+      color: '#B0A89E',
+      background: '#EDE8E0',
+      borderRadius: '6px',
+      padding: '3px 9px',
+      fontWeight: 500,
+    }}>
+      Brzy
+    </span>
+  )
+}
+
+function ArticleVisual({ emoji, bgFrom, bgTo, height = '100%' }: { emoji: string; bgFrom: string; bgTo: string; height?: string }) {
+  return (
+    <div style={{
+      background: `linear-gradient(135deg, ${bgFrom} 0%, ${bgTo} 100%)`,
+      height,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontSize: '72px',
+      flexShrink: 0,
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
+      {/* Subtle dot pattern */}
+      <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.06 }} xmlns="http://www.w3.org/2000/svg">
+        <pattern id={`dots-${emoji}`} x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+          <circle cx="2" cy="2" r="1.5" fill="white"/>
+        </pattern>
+        <rect width="100%" height="100%" fill={`url(#dots-${emoji})`}/>
+      </svg>
+      <span style={{ opacity: 0.45, position: 'relative', zIndex: 1 }}>{emoji}</span>
+    </div>
+  )
+}
 
 export default function Clanky() {
+  const [featured, ...rest] = CLANKY
+  const [second, third, ...listItems] = rest
+
   return (
     <div style={{ background: '#FDFAF6', minHeight: '100vh' }}>
       <Navigation variant="light" />
@@ -105,182 +182,196 @@ export default function Clanky() {
 
       <section style={{ maxWidth: '1200px', margin: '0 auto', padding: '56px 32px 80px' }}>
 
-        {/* Hlavní featured článek */}
+        {/* ── HERO článek ── */}
         <div style={{
-          background: 'white',
-          borderRadius: '24px',
-          overflow: 'hidden',
-          border: '1px solid #EDE8E0',
-          boxShadow: '0 4px 24px rgba(20,40,35,0.06)',
-          marginBottom: '40px',
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
-          minHeight: '320px',
+          borderRadius: '28px',
+          overflow: 'hidden',
+          border: '1px solid #EDE8E0',
+          boxShadow: '0 8px 40px rgba(20,40,35,0.08)',
+          marginBottom: '24px',
+          minHeight: '380px',
         }}>
-          {/* Ilustrace */}
-          <div style={{
-            background: 'linear-gradient(135deg, #2A5248 0%, #3D7068 50%, #4A8070 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '80px',
-            opacity: 1,
-          }}>
-            <span style={{ opacity: 0.5 }}>{FEATURED.emoji}</span>
-          </div>
+          <ArticleVisual emoji={featured.emoji} bgFrom={featured.bgFrom} bgTo={featured.bgTo} />
 
-          {/* Text */}
-          <div style={{ padding: '40px 40px 36px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-              <span style={{
-                background: FEATURED.kategorieColor + '18',
-                color: FEATURED.kategorieColor,
-                border: `1px solid ${FEATURED.kategorieColor}33`,
-                borderRadius: '20px',
-                padding: '4px 12px',
-                fontSize: '12px',
-                fontWeight: 500,
-              }}>
-                {FEATURED.kategorie}
-              </span>
-              <span style={{ fontSize: '12px', color: '#9A9088' }}>Doporučujeme</span>
-            </div>
-
-            <h2 className="font-playfair" style={{
-              fontSize: '26px',
-              fontWeight: 600,
-              color: '#1C3D34',
-              lineHeight: 1.25,
-              marginBottom: '16px',
-            }}>
-              {FEATURED.titulek}
-            </h2>
-
-            <p style={{
-              fontSize: '14px',
-              color: '#5A6A64',
-              lineHeight: 1.75,
-              marginBottom: '28px',
-            }}>
-              {FEATURED.perex}
-            </p>
-
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div>
-                <p style={{ fontSize: '13px', fontWeight: 500, color: '#1C3D34', margin: 0 }}>{FEATURED.autor}</p>
-                <p style={{ fontSize: '12px', color: '#9A9088', margin: '2px 0 0' }}>{FEATURED.datum} · {FEATURED.cteniMin} min čtení</p>
+          <div style={{ padding: '48px 44px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: 'white' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+                <KategoriePill label={featured.kategorie} color={featured.kategorieColor} />
+                <span style={{ fontSize: '11px', color: '#B0A89E', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>Doporučujeme</span>
               </div>
-              <span style={{
-                display: 'inline-flex', alignItems: 'center', gap: '6px',
-                background: 'linear-gradient(135deg, #1C3D34, #2E5E52)',
-                color: 'white',
-                padding: '10px 20px',
-                borderRadius: '10px',
-                fontSize: '13px',
-                fontWeight: 500,
-                cursor: 'default',
-                opacity: 0.5,
+              <h2 className="font-playfair" style={{
+                fontSize: 'clamp(22px, 2.5vw, 30px)',
+                fontWeight: 600,
+                color: '#1C3D34',
+                lineHeight: 1.25,
+                marginBottom: '18px',
+                letterSpacing: '-0.3px',
               }}>
-                Brzy k dispozici
-              </span>
+                {featured.titulek}
+              </h2>
+              <p style={{ fontSize: '15px', color: '#5A6A64', lineHeight: 1.8, margin: 0 }}>
+                {featured.perex}
+              </p>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '32px', paddingTop: '24px', borderTop: '1px solid #EDE8E0' }}>
+              <MetaLine autor={featured.autor} datum={featured.datum} min={featured.cteniMin} />
+              <BrzyBadge />
             </div>
           </div>
         </div>
 
-        {/* Grid ostatních článků */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
-          {REST.map((clanek) => (
-            <div key={clanek.id} style={{
-              background: 'white',
-              borderRadius: '20px',
-              overflow: 'hidden',
-              border: '1px solid #EDE8E0',
-              boxShadow: '0 2px 12px rgba(20,40,35,0.04)',
-              display: 'flex',
-              flexDirection: 'column',
-            }}>
-              {/* Barevný header */}
-              <div style={{
-                background: 'linear-gradient(135deg, #2A5248, #3D7068)',
-                height: '120px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '48px',
-              }}>
-                <span style={{ opacity: 0.4 }}>{clanek.emoji}</span>
+        {/* ── Druhý řádek: 3/5 + 2/5 ── */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '3fr 2fr',
+          gap: '24px',
+          marginBottom: '24px',
+        }}>
+          {/* Větší karta */}
+          <div style={{
+            borderRadius: '24px',
+            overflow: 'hidden',
+            border: '1px solid #EDE8E0',
+            boxShadow: '0 4px 20px rgba(20,40,35,0.05)',
+            display: 'flex',
+            flexDirection: 'column',
+            background: 'white',
+          }}>
+            <ArticleVisual emoji={second.emoji} bgFrom={second.bgFrom} bgTo={second.bgTo} height="180px" />
+            <div style={{ padding: '28px 30px 28px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div>
+                <div style={{ marginBottom: '14px' }}>
+                  <KategoriePill label={second.kategorie} color={second.kategorieColor} />
+                </div>
+                <h3 className="font-playfair" style={{ fontSize: '20px', fontWeight: 600, color: '#1C3D34', lineHeight: 1.3, marginBottom: '12px' }}>
+                  {second.titulek}
+                </h3>
+                <p style={{ fontSize: '14px', color: '#5A6A64', lineHeight: 1.7, margin: 0 }}>
+                  {second.perex}
+                </p>
               </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '24px', paddingTop: '18px', borderTop: '1px solid #EDE8E0' }}>
+                <MetaLine autor={second.autor} datum={second.datum} min={second.cteniMin} />
+                <BrzyBadge />
+              </div>
+            </div>
+          </div>
 
-              <div style={{ padding: '20px 22px 22px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+          {/* Menší karta — výraznější, tmavé pozadí */}
+          <div style={{
+            borderRadius: '24px',
+            overflow: 'hidden',
+            background: `linear-gradient(160deg, ${third.bgFrom}, ${third.bgTo})`,
+            boxShadow: '0 4px 20px rgba(20,40,35,0.1)',
+            padding: '32px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            position: 'relative',
+          }}>
+            <div style={{ position: 'absolute', bottom: '-20px', right: '-10px', fontSize: '100px', opacity: 0.12, lineHeight: 1 }}>
+              {third.emoji}
+            </div>
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              <div style={{ marginBottom: '20px' }}>
                 <span style={{
-                  background: clanek.kategorieColor + '18',
-                  color: clanek.kategorieColor,
-                  border: `1px solid ${clanek.kategorieColor}33`,
+                  background: 'rgba(255,255,255,0.15)',
+                  color: 'rgba(255,255,255,0.9)',
                   borderRadius: '20px',
-                  padding: '3px 10px',
+                  padding: '4px 12px',
                   fontSize: '11px',
-                  fontWeight: 500,
-                  display: 'inline-block',
-                  marginBottom: '12px',
-                  alignSelf: 'flex-start',
-                }}>
-                  {clanek.kategorie}
-                </span>
-
-                <h3 className="font-playfair" style={{
-                  fontSize: '17px',
                   fontWeight: 600,
-                  color: '#1C3D34',
-                  lineHeight: 1.3,
-                  marginBottom: '10px',
-                  flex: 1,
+                  letterSpacing: '0.3px',
+                  textTransform: 'uppercase',
                 }}>
+                  {third.kategorie}
+                </span>
+              </div>
+              <h3 className="font-playfair" style={{ fontSize: '21px', fontWeight: 600, color: 'white', lineHeight: 1.3, marginBottom: '14px' }}>
+                {third.titulek}
+              </h3>
+              <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.65)', lineHeight: 1.7, margin: 0 }}>
+                {third.perex}
+              </p>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '28px', paddingTop: '18px', borderTop: '1px solid rgba(255,255,255,0.12)', position: 'relative', zIndex: 1 }}>
+              <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.45)', margin: 0 }}>
+                {third.datum} · {third.cteniMin} min
+              </p>
+              <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.1)', borderRadius: '6px', padding: '3px 9px' }}>Brzy</span>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Horizontální seznam ── */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          {listItems.map((clanek, i) => (
+            <div
+              key={clanek.id}
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '4px 1fr auto',
+                gap: '0 28px',
+                alignItems: 'center',
+                padding: '28px 32px',
+                background: 'white',
+                borderRadius: i === 0 ? '20px 20px 4px 4px' : i === listItems.length - 1 ? '4px 4px 20px 20px' : '4px',
+                border: '1px solid #EDE8E0',
+                cursor: 'default',
+              }}
+            >
+              {/* Barevný pruh vlevo */}
+              <div style={{
+                width: '4px',
+                height: '100%',
+                minHeight: '52px',
+                background: clanek.kategorieColor,
+                borderRadius: '4px',
+                alignSelf: 'stretch',
+              }} />
+
+              {/* Text */}
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                  <KategoriePill label={clanek.kategorie} color={clanek.kategorieColor} />
+                  <MetaLine autor={clanek.autor} datum={clanek.datum} min={clanek.cteniMin} />
+                </div>
+                <h3 className="font-playfair" style={{ fontSize: '18px', fontWeight: 600, color: '#1C3D34', lineHeight: 1.3, margin: '0 0 8px' }}>
                   {clanek.titulek}
                 </h3>
-
-                <p style={{
-                  fontSize: '13px',
-                  color: '#7A8C85',
-                  lineHeight: 1.65,
-                  marginBottom: '16px',
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden',
-                } as React.CSSProperties}>
+                <p style={{ fontSize: '13px', color: '#7A8C85', lineHeight: 1.6, margin: 0 }}>
                   {clanek.perex}
                 </p>
+              </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #EDE8E0', paddingTop: '14px' }}>
-                  <p style={{ fontSize: '12px', color: '#9A9088', margin: 0 }}>
-                    {clanek.datum} · {clanek.cteniMin} min
-                  </p>
-                  <span style={{ fontSize: '12px', color: '#9A9088', fontStyle: 'italic' }}>
-                    Brzy…
-                  </span>
-                </div>
+              {/* Emoji + brzy */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', paddingLeft: '8px' }}>
+                <span style={{ fontSize: '28px', opacity: 0.5 }}>{clanek.emoji}</span>
+                <BrzyBadge />
               </div>
             </div>
           ))}
         </div>
 
-        {/* Placeholder note */}
+        {/* Banner */}
         <div style={{
-          marginTop: '48px',
-          padding: '24px 28px',
+          marginTop: '40px',
+          padding: '22px 28px',
           background: 'linear-gradient(135deg, #1C3D34, #2E5E52)',
           borderRadius: '16px',
           display: 'flex',
           alignItems: 'center',
           gap: '16px',
         }}>
-          <span style={{ fontSize: '24px' }}>✍️</span>
+          <span style={{ fontSize: '22px' }}>✍️</span>
           <div>
-            <p style={{ fontSize: '14px', fontWeight: 600, color: 'white', margin: '0 0 4px' }}>
+            <p style={{ fontSize: '14px', fontWeight: 600, color: 'white', margin: '0 0 3px' }}>
               Články jsou teprve na cestě
             </p>
-            <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.55)', margin: 0 }}>
-              Tady vidíš náhled budoucích témat. Skutečné texty začneme publikovat brzy — sleduj nás.
+            <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', margin: 0 }}>
+              Tady vidíš náhled budoucích témat. Skutečné texty začneme publikovat brzy.
             </p>
           </div>
         </div>
