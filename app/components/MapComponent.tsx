@@ -14,12 +14,12 @@ L.Icon.Default.mergeOptions({
 })
 
 const THERAPY_COLORS: Record<TherapyType, string> = {
-  'Psychoterapie': '#6366f1',
-  'Fyzioterapie': '#22c55e',
-  'Masáže': '#f97316',
-  'Osteopatie': '#14b8a6',
-  'Arteterapie': '#ec4899',
-  'Výživové poradenství': '#eab308',
+  'Psychoterapie': '#7B6FAD',
+  'Fyzioterapie': '#5A9E72',
+  'Masáže': '#C4845A',
+  'Osteopatie': '#4A9E96',
+  'Arteterapie': '#C46E97',
+  'Výživové poradenství': '#A89040',
 }
 
 function createColoredIcon(therapyType: TherapyType) {
@@ -43,6 +43,17 @@ const CZECH_BOUNDS: L.LatLngBoundsExpression = [
   [48.5, 12.0],
   [51.1, 18.9],
 ]
+
+function MapResizer({ trigger }: { trigger: boolean }) {
+  const map = useMap()
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      map.invalidateSize()
+    }, 400) // počkáme na dokončení CSS animace (350ms + buffer)
+    return () => clearTimeout(timeout)
+  }, [trigger, map])
+  return null
+}
 
 function MapController({ search }: { search: string }) {
   const map = useMap()
@@ -80,9 +91,10 @@ interface Props {
   therapists: Therapist[]
   onSelect: (therapist: Therapist) => void
   search: string
+  sidebarOpen: boolean
 }
 
-export default function MapComponent({ therapists, onSelect, search }: Props) {
+export default function MapComponent({ therapists, onSelect, search, sidebarOpen }: Props) {
 
   return (
     <MapContainer
@@ -101,6 +113,7 @@ export default function MapComponent({ therapists, onSelect, search }: Props) {
         url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
       />
 
+      <MapResizer trigger={sidebarOpen} />
       <MapController search={search} />
 
       {therapists.map((t) => (
@@ -110,45 +123,50 @@ export default function MapComponent({ therapists, onSelect, search }: Props) {
           icon={createColoredIcon(t.therapy_types[0])}
           eventHandlers={{ click: () => onSelect(t) }}
         >
-          <Tooltip direction="top" offset={[0, -16]} opacity={1}>
-            <div style={{ fontFamily: 'system-ui, sans-serif', minWidth: '160px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+          <Tooltip direction="top" offset={[0, -18]} opacity={1} className="teramapa-tooltip">
+            <div style={{ fontFamily: 'system-ui, sans-serif', minWidth: '180px', maxWidth: '220px' }}>
+              {/* Foto + jméno */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
                 {t.profile_photo_url ? (
                   <img
                     src={t.profile_photo_url}
                     alt=""
-                    style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
+                    style={{ width: '42px', height: '42px', borderRadius: '12px', objectFit: 'cover', flexShrink: 0 }}
                   />
                 ) : (
                   <div style={{
-                    width: '36px', height: '36px', borderRadius: '50%',
-                    background: THERAPY_COLORS[t.therapy_types[0]] + '33',
+                    width: '42px', height: '42px', borderRadius: '12px',
+                    background: 'linear-gradient(135deg, #2A5248, #3D7068)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '16px', flexShrink: 0,
+                    fontSize: '18px', flexShrink: 0,
                   }}>
-                    👤
+                    🌿
                   </div>
                 )}
-                <p style={{ fontWeight: 700, fontSize: '13px', margin: 0, lineHeight: 1.3 }}>{t.name}</p>
+                <div>
+                  <p style={{ fontWeight: 600, fontSize: '13px', margin: 0, lineHeight: 1.3, color: '#1C3D34' }}>{t.name}</p>
+                  <p style={{ margin: '2px 0 0', fontSize: '11px', color: '#9A9088' }}>{t.city}</p>
+                </div>
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', marginBottom: '4px' }}>
+              {/* Tagy */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                 {t.therapy_types.map((type) => (
                   <span
                     key={type}
                     style={{
-                      background: THERAPY_COLORS[type],
-                      color: 'white',
-                      borderRadius: '10px',
-                      padding: '1px 7px',
+                      background: THERAPY_COLORS[type] + '20',
+                      color: THERAPY_COLORS[type],
+                      border: `1px solid ${THERAPY_COLORS[type]}44`,
+                      borderRadius: '8px',
+                      padding: '2px 8px',
                       fontSize: '11px',
-                      fontWeight: 600,
+                      fontWeight: 500,
                     }}
                   >
                     {type}
                   </span>
                 ))}
               </div>
-              <p style={{ margin: 0, fontSize: '11px', color: '#888' }}>📍 {t.city}</p>
             </div>
           </Tooltip>
         </Marker>

@@ -7,12 +7,12 @@ import { supabase } from '../lib/supabase'
 import { Therapist, TherapyType } from '../data/therapists'
 
 const THERAPY_COLORS: Record<TherapyType, string> = {
-  'Psychoterapie': '#6366f1',
-  'Fyzioterapie': '#22c55e',
-  'Masáže': '#f97316',
-  'Osteopatie': '#14b8a6',
-  'Arteterapie': '#ec4899',
-  'Výživové poradenství': '#eab308',
+  'Psychoterapie': '#7B6FAD',
+  'Fyzioterapie': '#5A9E72',
+  'Masáže': '#C4845A',
+  'Osteopatie': '#4A9E96',
+  'Arteterapie': '#C46E97',
+  'Výživové poradenství': '#A89040',
 }
 
 function TerapeutDetail() {

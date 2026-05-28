@@ -6,12 +6,12 @@ import { Therapist, TherapyType } from '../data/therapists'
 import { supabase } from '../lib/supabase'
 
 const THERAPY_COLORS: Record<TherapyType, string> = {
-  'Psychoterapie': '#6366f1',
-  'Fyzioterapie': '#22c55e',
-  'Masáže': '#f97316',
-  'Osteopatie': '#14b8a6',
-  'Arteterapie': '#ec4899',
-  'Výživové poradenství': '#eab308',
+  'Psychoterapie': '#9B8FC8',
+  'Fyzioterapie': '#6AAF82',
+  'Masáže': '#D4956A',
+  'Osteopatie': '#5AAEA6',
+  'Arteterapie': '#D47EA7',
+  'Výživové poradenství': '#B8A050',
 }
 
 interface Props {
@@ -35,46 +35,100 @@ export default function TherapistPanel({ therapist, onClose }: Props) {
 
   return (
     <>
+      {/* Overlay pro mobil */}
       {therapist && (
-        <div className="fixed inset-0 bg-black/20 z-[999] sm:hidden" onClick={onClose} />
+        <div
+          onClick={onClose}
+          style={{
+            position: 'fixed', inset: 0,
+            background: 'rgba(20,40,35,0.35)',
+            backdropFilter: 'blur(2px)',
+            zIndex: 999,
+          }}
+          className="sm:hidden"
+        />
       )}
 
-      <div className={`fixed top-0 right-0 h-full w-full sm:w-96 bg-white shadow-2xl transform transition-transform duration-300 z-[1000] overflow-y-auto ${
-        therapist ? 'translate-x-0' : 'translate-x-full'
-      }`}>
+      {/* Panel */}
+      <div
+        style={{
+          position: 'fixed',
+          top: '16px',
+          right: therapist ? '16px' : '-440px',
+          height: 'calc(100vh - 32px)',
+          width: '400px',
+          background: '#FDFAF6',
+          borderRadius: '20px',
+          boxShadow: '0 24px 64px rgba(20,40,35,0.18)',
+          transition: 'right 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+          zIndex: 1000,
+          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+        className="w-full sm:w-[400px]"
+      >
         {therapist && (
           <>
             {/* Foto hlavička */}
-            <div className="relative">
+            <div style={{ position: 'relative', flexShrink: 0 }}>
               {therapist.profile_photo_url ? (
                 <img
                   src={therapist.profile_photo_url}
                   alt={therapist.name}
-                  className="w-full h-52 object-cover"
+                  style={{ width: '100%', height: '220px', objectFit: 'cover', borderRadius: '20px 20px 0 0', display: 'block' }}
                 />
               ) : (
-                <div className="w-full h-52 bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
-                  <span className="text-6xl opacity-40">👤</span>
+                <div style={{
+                  width: '100%', height: '220px',
+                  background: 'linear-gradient(135deg, #2A5248 0%, #3D7068 100%)',
+                  borderRadius: '20px 20px 0 0',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <span style={{ fontSize: '64px', opacity: 0.25 }}>🌿</span>
                 </div>
               )}
+
+              {/* Zavírací tlačítko */}
               <button
                 onClick={onClose}
-                className="absolute top-3 right-3 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center text-gray-500 hover:text-gray-900 text-sm font-bold"
+                style={{
+                  position: 'absolute', top: '12px', right: '12px',
+                  width: '32px', height: '32px',
+                  background: 'rgba(255,255,255,0.9)',
+                  borderRadius: '50%',
+                  border: 'none', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+                  fontSize: '14px', color: '#555',
+                  backdropFilter: 'blur(4px)',
+                }}
               >
                 ✕
               </button>
             </div>
 
-            <div className="p-5 space-y-4">
-              {/* Název a typy */}
+            {/* Obsah */}
+            <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
+
+              {/* Jméno + typy */}
               <div>
-                <h2 className="text-xl font-bold text-gray-900 mb-2">{therapist.name}</h2>
-                <div className="flex flex-wrap gap-1.5">
+                <h2 className="font-playfair" style={{ fontSize: '22px', fontWeight: 600, color: '#1C3D34', marginBottom: '10px', lineHeight: 1.2 }}>
+                  {therapist.name}
+                </h2>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                   {therapist.therapy_types.map((type) => (
                     <span
                       key={type}
-                      style={{ background: THERAPY_COLORS[type] }}
-                      className="text-white text-xs px-2.5 py-1 rounded-full font-medium"
+                      style={{
+                        background: THERAPY_COLORS[type] + '22',
+                        color: THERAPY_COLORS[type],
+                        border: `1px solid ${THERAPY_COLORS[type]}44`,
+                        borderRadius: '20px',
+                        padding: '3px 12px',
+                        fontSize: '12px',
+                        fontWeight: 500,
+                      }}
                     >
                       {type}
                     </span>
@@ -83,46 +137,95 @@ export default function TherapistPanel({ therapist, onClose }: Props) {
               </div>
 
               {/* Místo */}
-              <p className="text-sm text-gray-500 flex items-center gap-1.5">
-                <span>📍</span> {therapist.address}, {therapist.city}
-              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{
+                  width: '28px', height: '28px', borderRadius: '8px',
+                  background: '#EDE8E0',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '13px', flexShrink: 0,
+                }}>
+                  📍
+                </div>
+                <span style={{ fontSize: '13px', color: '#7A8C85' }}>
+                  {therapist.address}, {therapist.city}
+                </span>
+              </div>
+
+              {/* Oddělovač */}
+              <div style={{ height: '1px', background: '#EDE8E0' }} />
 
               {/* Popis */}
-              <p className="text-sm text-gray-600 leading-relaxed">{therapist.description}</p>
+              <p style={{ fontSize: '13px', color: '#5A6A64', lineHeight: 1.7, margin: 0 }}>
+                {therapist.description}
+              </p>
 
               {/* Galerie */}
               {photos.length > 0 && (
                 <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Fotografie</p>
-                  <div className="grid grid-cols-3 gap-1.5">
+                  <p style={{ fontSize: '10px', fontWeight: 600, color: '#AAA099', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '10px' }}>
+                    Fotografie
+                  </p>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
                     {photos.map((url, i) => (
-                      <img key={i} src={url} alt="" className="w-full h-20 object-cover rounded-lg" />
+                      <img
+                        key={i} src={url} alt=""
+                        style={{ width: '100%', height: '80px', objectFit: 'cover', borderRadius: '10px' }}
+                      />
                     ))}
                   </div>
                 </div>
               )}
 
               {/* Kontakt */}
-              <div className="space-y-2">
-                {therapist.phone && (
-                  <a href={`tel:${therapist.phone}`} className="flex items-center gap-2 text-sm text-indigo-600 hover:underline">
-                    <span>📞</span> {therapist.phone}
-                  </a>
-                )}
-                {therapist.website && (
-                  <a href={therapist.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-indigo-600 hover:underline">
-                    <span>🌐</span> Navštívit web
-                  </a>
-                )}
-              </div>
+              {(therapist.phone || therapist.website) && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {therapist.phone && (
+                    <a
+                      href={`tel:${therapist.phone}`}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '10px',
+                        padding: '10px 14px', borderRadius: '10px',
+                        background: '#F5F0E8', textDecoration: 'none',
+                        fontSize: '13px', color: '#2E5E52', fontWeight: 500,
+                      }}
+                    >
+                      <span>📞</span> {therapist.phone}
+                    </a>
+                  )}
+                  {therapist.website && (
+                    <a
+                      href={therapist.website} target="_blank" rel="noopener noreferrer"
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '10px',
+                        padding: '10px 14px', borderRadius: '10px',
+                        background: '#F5F0E8', textDecoration: 'none',
+                        fontSize: '13px', color: '#2E5E52', fontWeight: 500,
+                      }}
+                    >
+                      <span>🌐</span> Navštívit web
+                    </a>
+                  )}
+                </div>
+              )}
 
-              {/* Tlačítko celý profil */}
+              {/* CTA tlačítko */}
               <Link
                 href={`/terapeut?id=${therapist.id}`}
-                className="flex items-center justify-center w-full bg-indigo-600 text-white rounded-xl py-3 text-sm font-medium hover:bg-indigo-700 transition-colors"
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: 'linear-gradient(135deg, #1C3D34 0%, #2E5E52 100%)',
+                  color: 'white',
+                  borderRadius: '14px',
+                  padding: '14px',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  textDecoration: 'none',
+                  letterSpacing: '0.2px',
+                }}
               >
                 Zobrazit celý profil →
               </Link>
+
             </div>
           </>
         )}
