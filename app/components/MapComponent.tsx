@@ -1,6 +1,6 @@
 'use client'
 
-import { MapContainer, TileLayer, Marker } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Tooltip } from 'react-leaflet'
 import L from 'leaflet'
 import { Therapist, TherapyType } from '../data/therapists'
 import 'leaflet/dist/leaflet.css'
@@ -61,7 +61,49 @@ export default function MapComponent({ therapists, onSelect }: Props) {
           position={[t.lat, t.lng]}
           icon={createColoredIcon(t.therapy_types[0])}
           eventHandlers={{ click: () => onSelect(t) }}
-        />
+        >
+          <Tooltip direction="top" offset={[0, -16]} opacity={1}>
+            <div style={{ fontFamily: 'system-ui, sans-serif', minWidth: '160px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                {t.profile_photo_url ? (
+                  <img
+                    src={t.profile_photo_url}
+                    alt=""
+                    style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
+                  />
+                ) : (
+                  <div style={{
+                    width: '36px', height: '36px', borderRadius: '50%',
+                    background: THERAPY_COLORS[t.therapy_types[0]] + '33',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '16px', flexShrink: 0,
+                  }}>
+                    👤
+                  </div>
+                )}
+                <p style={{ fontWeight: 700, fontSize: '13px', margin: 0, lineHeight: 1.3 }}>{t.name}</p>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', marginBottom: '4px' }}>
+                {t.therapy_types.map((type) => (
+                  <span
+                    key={type}
+                    style={{
+                      background: THERAPY_COLORS[type],
+                      color: 'white',
+                      borderRadius: '10px',
+                      padding: '1px 7px',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {type}
+                  </span>
+                ))}
+              </div>
+              <p style={{ margin: 0, fontSize: '11px', color: '#888' }}>📍 {t.city}</p>
+            </div>
+          </Tooltip>
+        </Marker>
       ))}
     </MapContainer>
   )
